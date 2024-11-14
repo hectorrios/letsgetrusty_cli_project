@@ -163,6 +163,7 @@ pub mod test_utils {
         fn read_db(&self) -> Result<DBState> {
             // TODO: fix this error by deriving the appropriate traits for Story
             let state = self.last_written_state.borrow().clone();
+            // let state = self.last_written_state.clone();
             Ok(state)
         }
 
@@ -170,6 +171,7 @@ pub mod test_utils {
             let latest_state = &self.last_written_state;
             // TODO: fix this error by deriving the appropriate traits for DBState
             *latest_state.borrow_mut() = db_state.clone();
+            //self.last_written_state = db_state.clone();
             Ok(())
         }
     }
