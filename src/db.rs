@@ -35,7 +35,11 @@ impl JiraDatabase {
         //read in the Database State
         let mut db_state = self.database.read_db()?;
 
-        //find the Epic, panic if the Epic ID does not exist
+        if !db_state.epics.contains_key(&epic_id) {
+            return Err(anyhow!("Epic ID {} does not exist", epic_id));
+        }
+
+        //Get the Epic
         let epic = db_state.epics.get_mut(&epic_id).unwrap();
 
         //add new Story to Epic with a Story ID of DBState::last_item_id + 1
@@ -73,6 +77,8 @@ impl JiraDatabase {
 
         assert!(epic.stories.is_empty());
 
+        db_state.epics.remove(&epic_id);
+
         //write the state back to the file
         self.database.write_db(&db_state)?;
         Ok(())
@@ -108,11 +114,41 @@ impl JiraDatabase {
     }
 
     pub fn update_epic_status(&self, epic_id: u32, status: Status) -> Result<()> {
-        todo!()
+        //read in the Database State
+        let mut db_state = self.database.read_db()?;
+
+        //Do we even have the key? For now, just return early
+        if !db_state.epics.contains_key(&epic_id) {
+            return Err(anyhow!("Epic ID: {} was not found", epic_id));
+        }
+
+        //Grab a mutable reference to the Epic with id epic_id
+        let epic = db_state.epics.get_mut(&epic_id).unwrap();
+        epic.status = status;
+
+        //write the state back to the file
+        self.database.write_db(&db_state)?;
+
+        Ok(())
     }
 
     pub fn update_story_status(&self, story_id: u32, status: Status) -> Result<()> {
-        todo!()
+        //read in the Database State
+        let mut db_state = self.database.read_db()?;
+
+        //Do we even have the key? For now, just return early
+        if !db_state.stories.contains_key(&story_id) {
+            return Err(anyhow!("Story ID: {} was not found", story_id));
+        }
+
+        //Grab a mutable reference to the Story
+        let story = db_state.stories.get_mut(&story_id).unwrap();
+        story.status = status;
+
+        //write the state back to the file
+        self.database.write_db(&db_state)?;
+
+        Ok(())
     }
 }
 
